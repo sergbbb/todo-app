@@ -1,5 +1,6 @@
 ## Local App setup
 ```
+composer install
 bash ./vendor/bin/sail up -d
 bash ./vendor/bin/sail composer install
 bash ./vendor/bin/sail npm install
