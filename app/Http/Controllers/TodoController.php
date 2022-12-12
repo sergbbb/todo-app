@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TodoPatchRequest;
+use App\Http\Requests\TodoStoreRequest;
+use App\Http\Resources\TodoResource;
+use App\Models\Todo;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,7 +19,12 @@ class TodoController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Dashboard');
+        $user = auth()->user();
+
+        return Inertia::render('Dashboard')
+            ->with([
+                'todos' => TodoResource::collection($user->todos),
+            ]);
     }
 
     /**
@@ -30,12 +40,19 @@ class TodoController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param TodoStoreRequest $request
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(Request $request)
+    public function store(TodoStoreRequest $request)
     {
-        //
+        $user = auth()->user();
+
+        $todo = new Todo();
+        $todo->title = $request->get('title');
+
+        $user->todos()->save($todo);
+
+        return redirect()->back();
     }
 
     /**
@@ -63,23 +80,28 @@ class TodoController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param TodoPatchRequest $request
+     * @param int $id
+     * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(TodoPatchRequest $request, $id)
     {
-        //
+        $user = auth()->user();
+        $todo = $user->todos()->find($id);
+        $todo->fill($request->all())->save();
+        return redirect()->back();
     }
 
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
     {
-        //
+        $user = auth()->user();
+        $user->todos()->find($id)->delete();
+        return redirect()->back();
     }
 }
