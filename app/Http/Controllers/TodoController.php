@@ -6,6 +6,7 @@ use App\Http\Requests\TodoPatchRequest;
 use App\Http\Requests\TodoStoreRequest;
 use App\Http\Resources\TodoResource;
 use App\Models\Todo;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -51,6 +52,8 @@ class TodoController extends Controller
         $todo->title = $request->get('title');
 
         $user->todos()->save($todo);
+
+        $user->checkTodosLimitAndMarkAsDone();
 
         return redirect()->back();
     }
